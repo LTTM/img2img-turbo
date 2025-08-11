@@ -2,6 +2,7 @@ import os
 import argparse
 from PIL import Image
 import torch
+import tqdm
 from torchvision import transforms
 from cyclegan_turbo import CycleGAN_Turbo
 from my_utils.training_utils import build_transform
@@ -9,7 +10,7 @@ from my_utils.training_utils import build_transform
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input_image', type=str, required=True, help='path to the input image')
+    parser.add_argument('--input_dir', type=str, required=True, help='path to the input directory')
     parser.add_argument('--prompt', type=str, required=False, help='the prompt to be used. It is required when loading a custom model_path.')
     parser.add_argument('--model_name', type=str, default=None, help='name of the pretrained model to be used')
     parser.add_argument('--model_path', type=str, default=None, help='path to a local model state dict to be used')
@@ -39,20 +40,25 @@ if __name__ == "__main__":
 
     T_val = build_transform(args.image_prep)
 
-    input_image = Image.open(args.input_image).convert('RGB')
-    # translate the image
-    with torch.no_grad():
-        input_img = T_val(input_image)
-        x_t = transforms.ToTensor()(input_img)
-        x_t = transforms.Normalize([0.5], [0.5])(x_t).unsqueeze(0).cuda()
-        if args.use_fp16:
-            x_t = x_t.half()
-        output = model(x_t, direction=args.direction, caption=args.prompt)
+    for input_image_path in tqdm(os.listdir(args.input_dir), desc='Processing images'):
+        input_image_path = os.path.join(args.input_dir, input_image_path)
+        if not os.path.isfile(input_image_path):
+            continue
 
-    output_pil = transforms.ToPILImage()(output[0].cpu() * 0.5 + 0.5)
-    output_pil = output_pil.resize((input_image.width, input_image.height), Image.LANCZOS)
+        input_image = Image.open(args.input_image).convert('RGB')
+        # translate the image
+        with torch.no_grad():
+            input_img = T_val(input_image)
+            x_t = transforms.ToTensor()(input_img)
+            x_t = transforms.Normalize([0.5], [0.5])(x_t).unsqueeze(0).cuda()
+            if args.use_fp16:
+                x_t = x_t.half()
+            output = model(x_t, direction=args.direction, caption=args.prompt)
 
-    # save the output image
-    bname = os.path.basename(args.input_image)
-    os.makedirs(args.output_dir, exist_ok=True)
-    output_pil.save(os.path.join(args.output_dir, bname))
+        output_pil = transforms.ToPILImage()(output[0].cpu() * 0.5 + 0.5)
+        # output_pil = output_pil.resize((input_image.width, input_image.height), Image.LANCZOS)
+
+        # save the output image
+        bname = os.path.basename(args.input_image)
+        os.makedirs(args.output_dir, exist_ok=True)
+        output_pil.save(os.path.join(args.output_dir, bname))

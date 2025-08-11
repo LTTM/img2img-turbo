@@ -210,6 +210,10 @@ def build_transform(image_prep):
         T = transforms.Compose([
             transforms.Resize((512, 512), interpolation=Image.LANCZOS)
         ])
+    elif image_prep in ["resize_2160"]:
+        T = transforms.Compose([
+            transforms.Resize((2160//2,3840//2), interpolation=Image.BILINEAR, antialias=True)
+        ])
     elif image_prep == "no_resize":
         T = transforms.Lambda(lambda x: x)
     return T
@@ -257,11 +261,11 @@ class PairedDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         """
-        Retrieves a dataset item given its index. Each item consists of an input image, 
-        its corresponding output image, the captions associated with the input image, 
+        Retrieves a dataset item given its index. Each item consists of an input image,
+        its corresponding output image, the captions associated with the input image,
         and the tokenized form of this caption.
 
-        This method performs the necessary preprocessing on both the input and output images, 
+        This method performs the necessary preprocessing on both the input and output images,
         including scaling and normalization, as well as tokenizing the caption using a provided tokenizer.
 
         Parameters:
@@ -269,17 +273,17 @@ class PairedDataset(torch.utils.data.Dataset):
 
         Returns:
         dict: A dictionary containing the following key-value pairs:
-            - "output_pixel_values": a tensor of the preprocessed output image with pixel values 
+            - "output_pixel_values": a tensor of the preprocessed output image with pixel values
             scaled to [-1, 1].
-            - "conditioning_pixel_values": a tensor of the preprocessed input image with pixel values 
+            - "conditioning_pixel_values": a tensor of the preprocessed input image with pixel values
             scaled to [0, 1].
             - "caption": the text caption.
             - "input_ids": a tensor of the tokenized caption.
 
         Note:
-        The actual preprocessing steps (scaling and normalization) for images are defined externally 
-        and passed to this class through the `image_prep` parameter during initialization. The 
-        tokenization process relies on the `tokenizer` also provided at initialization, which 
+        The actual preprocessing steps (scaling and normalization) for images are defined externally
+        and passed to this class through the `image_prep` parameter during initialization. The
+        tokenization process relies on the `tokenizer` also provided at initialization, which
         should be compatible with the models intended to be used with this dataset.
         """
         img_name = self.img_names[idx]
@@ -363,13 +367,13 @@ class UnpairedDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         """
-        Fetches a pair of unaligned images from the source and target domains along with their 
+        Fetches a pair of unaligned images from the source and target domains along with their
         corresponding tokenized captions.
 
         For the source domain, if the requested index is within the range of available images,
         the specific image at that index is chosen. If the index exceeds the number of source
         images, a random source image is selected. For the target domain,
-        an image is always randomly selected, irrespective of the index, to maintain the 
+        an image is always randomly selected, irrespective of the index, to maintain the
         unpaired nature of the dataset.
 
         Both images are preprocessed according to the specified image transformation `T`, and normalized.
