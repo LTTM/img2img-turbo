@@ -1,6 +1,6 @@
 # img2img-turbo
 
-[**Paper**](https://arxiv.org/abs/2403.12036) | [**Sketch2Image Demo**](https://huggingface.co/spaces/gparmar/img2img-turbo-sketch) 
+[**Paper**](https://arxiv.org/abs/2403.12036) | [**Sketch2Image Demo**](https://huggingface.co/spaces/gparmar/img2img-turbo-sketch)
 #### **Quick start:** [**Running Locally**](#getting-started) | [**Gradio (locally hosted)**](#gradio-demo) | [**Training**](#training-with-your-own-data)
 
 ### Cat Sketching
@@ -14,9 +14,9 @@
 </p>
 
 
-We propose a general method for adapting a single-step diffusion model, such as SD-Turbo, to new tasks and domains through adversarial learning. This enables us to leverage the internal knowledge of pre-trained diffusion models while achieving efficient inference (e.g., for 512x512 images, 0.29 seconds on A6000 and 0.11 seconds on A100). 
+We propose a general method for adapting a single-step diffusion model, such as SD-Turbo, to new tasks and domains through adversarial learning. This enables us to leverage the internal knowledge of pre-trained diffusion models while achieving efficient inference (e.g., for 512x512 images, 0.29 seconds on A6000 and 0.11 seconds on A100).
 
-Our one-step conditional models **CycleGAN-Turbo** and **pix2pix-turbo** can perform various image-to-image translation tasks for both unpaired and paired settings. CycleGAN-Turbo outperforms existing GAN-based and diffusion-based methods, while pix2pix-turbo is on par with recent works such as ControlNet for Sketch2Photo and Edge2Image, but with one-step inference. 
+Our one-step conditional models **CycleGAN-Turbo** and **pix2pix-turbo** can perform various image-to-image translation tasks for both unpaired and paired settings. CycleGAN-Turbo outperforms existing GAN-based and diffusion-based methods, while pix2pix-turbo is on par with recent works such as ControlNet for Sketch2Photo and Edge2Image, but with one-step inference.
 
 [One-Step Image Translation with Text-to-Image Models](https://arxiv.org/abs/2403.12036)<br>
 [Gaurav Parmar](https://gauravparmar.com/), [Taesung Park](https://taesung.me/), [Srinivasa Narasimhan](https://www.cs.cmu.edu/~srinivas/), [Jun-Yan Zhu](https://github.com/junyanz/)<br>
@@ -95,7 +95,7 @@ We tightly integrate three separate modules in the original latent diffusion mod
     ```
     conda env create -f environment.yaml
     ```
-- Following this, you can activate the conda environment with the command below. 
+- Following this, you can activate the conda environment with the command below.
   ```
   conda activate img2img-turbo
   ```
@@ -104,6 +104,17 @@ We tightly integrate three separate modules in the original latent diffusion mod
   python3 -m venv venv
   source venv/bin/activate
   pip install -r requirements.txt
+  ```
+
+**Apptainer/Singularity Container**
+- Alternatively, you can use the provided Apptainer container definition for easy deployment:
+  ```bash
+  # Build the container (requires Apptainer/Singularity)
+  apptainer build torch_env.sif apptainer/torch_env.def
+
+  # Run inference using the container
+  apptainer run --nv torch_env.sif src/inference_unpaired.py --model_name "day_to_night" \
+      --input "assets/examples/day2night_input.png" --output_dir "outputs"
   ```
 **Paired Image Translation (pix2pix-turbo)**
 - The following command takes an image file and a prompt as inputs, extracts the canny edges, and saves the results in the directory specified.
@@ -148,7 +159,7 @@ We tightly integrate three separate modules in the original latent diffusion mod
 - The following command takes a **day** image file as input, and saves the output **night** in the directory specified.
     ```
     python src/inference_unpaired.py --model_name "day_to_night" \
-        --input_image "assets/examples/day2night_input.png" --output_dir "outputs"
+        --input "assets/examples/day2night_input.png" --output_dir "outputs"
     ```
     <table>
     <th>Input (day)</th>
@@ -163,7 +174,7 @@ We tightly integrate three separate modules in the original latent diffusion mod
 - The following command takes a **night** image file as input, and saves the output **day** in the directory specified.
     ```
     python src/inference_unpaired.py --model_name "night_to_day" \
-        --input_image "assets/examples/night2day_input.png" --output_dir "outputs"
+        --input "assets/examples/night2day_input.png" --output_dir "outputs"
     ```
     <table>
     <th>Input (night)</th>
@@ -178,7 +189,7 @@ We tightly integrate three separate modules in the original latent diffusion mod
 - The following command takes a **clear** image file as input, and saves the output **rainy** in the directory specified.
     ```
     python src/inference_unpaired.py --model_name "clear_to_rainy" \
-        --input_image "assets/examples/clear2rainy_input.png" --output_dir "outputs"
+        --input "assets/examples/clear2rainy_input.png" --output_dir "outputs"
     ```
     <table>
     <th>Input (clear)</th>
@@ -193,7 +204,7 @@ We tightly integrate three separate modules in the original latent diffusion mod
 - The following command takes a **rainy** image file as input, and saves the output **clear** in the directory specified.
     ```
     python src/inference_unpaired.py --model_name "rainy_to_clear" \
-        --input_image "assets/examples/rainy2clear_input.png" --output_dir "outputs"
+        --input "assets/examples/rainy2clear_input.png" --output_dir "outputs"
     ```
     <table>
     <th>Input (rainy)</th>
@@ -224,5 +235,10 @@ We tightly integrate three separate modules in the original latent diffusion mod
 - See the steps [here](docs/training_cyclegan_turbo.md) for training a CycleGAN-Turbo model on your unpaired data.
 
 
-## Acknowledgment
+## Acknowledgements
+
 Our work uses the Stable Diffusion-Turbo as the base model with the following [LICENSE](https://huggingface.co/stabilityai/sd-turbo/blob/main/LICENSE).
+
+This repository is a fork of the original [img2img-turbo](https://github.com/GaParmar/img2img-turbo) repository by Gaurav Parmar, Taesung Park, Srinivasa Narasimhan, and Jun-Yan Zhu for their paper "One-Step Image Translation with Text-to-Image Models". The original repository can be found [here](https://github.com/GaParmar/img2img-turbo).
+
+This specific fork was created by [Matteo Caligiuri](https://github.com/matteocali).

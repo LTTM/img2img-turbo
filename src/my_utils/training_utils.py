@@ -210,10 +210,6 @@ def build_transform(image_prep):
         T = transforms.Compose([
             transforms.Resize((512, 512), interpolation=Image.LANCZOS)
         ])
-    elif image_prep in ["resize_2160"]:
-        T = transforms.Compose([
-            transforms.Resize((2160//2,3840//2), interpolation=Image.BILINEAR, antialias=True)
-        ])
     elif image_prep == "no_resize":
         T = transforms.Lambda(lambda x: x)
     return T
